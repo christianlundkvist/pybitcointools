@@ -26,6 +26,28 @@ def uncover_pay_privkey(scan_privkey, spend_privkey, ephem_pubkey):
     return main.add_privkeys(spend_priv,shared_secret)    
 
 # Address encoding
+
+# Functions for basic stealth addresses,
+# i.e. one scan key, one spend key, no prefix
+def pubkeys_to_basic_stealth_address(scan_pubkey, spend_pubkey, magic_byte=42):
+    # magic_byte = 42 for mainnet, 43 for testnet.
+    hex_scankey = main.encode_pubkey(scan_pubkey, 'hex_compressed')
+    hex_spendkey = main.encode_pubkey(spend_pubkey, 'hex_compressed')
+    hex_data = '00{0:066x}01{1:066x}0100'.format(int(hex_scankey,16), int(hex_spendkey,16))
+    addr = main.hex_to_b58check(hex_data, magic_byte)
+    
+    return addr
+    
+def basic_stealth_address_to_pubkeys(stealth_address):
+    hex_data = main.b58check_to_hex(stealth_address)
+    if len(hex_data) != 140:
+        raise Exception('Stealth address is not of basic type (one scan key, one spend key, no prefix)')
+    
+    scan_pubkey = hex_data[2:68]
+    spend_pubkey = hex_data[70:136]
+    
+    return scan_pubkey, spend_pubkey
+
     
 def stealth_data_to_address(stealth_data, magic_byte=42):
     # magic_byte = 42 for mainnet, 43 for testnet.
@@ -62,7 +84,7 @@ def stealth_data_to_address(stealth_data, magic_byte=42):
     
     return main.hex_to_b58check(serialized, magic_byte)
 
-def stealth_address_to_data(addr):    
+def stealth_address_to_data(addr):
     hex_data = main.b58check_to_hex(addr)
     data = {}
     data['scan_pubkey'] = hex_data[2:68]
@@ -85,26 +107,6 @@ def stealth_address_to_data(addr):
         data['prefix_bitfield'] = int(bitfield_hex,16)
 
     return data
-
-# Convenience functions for basic stealth addresses,
-# i.e. one scan key, one spend key, no prefix
-def pubkeys_to_basic_stealth_address(scan_pubkey, spend_pubkey, magic_byte=42):
-    hex_scankey = main.encode_pubkey(scan_pubkey, 'hex_compressed')
-    hex_spendkey = main.encode_pubkey(spend_pubkey, 'hex_compressed')
-    hex_data = '00{0:066x}01{1:066x}0100'.format(int(hex_scankey,16), int(hex_spendkey,16))
-    addr = main.hex_to_b58check(hex_data, magic_byte)
-    
-    return addr
-    
-def basic_stealth_address_to_pubkeys(stealth_address):
-    hex_data = main.b58check_to_hex(stealth_address)
-    if len(hex_data) != 140:
-        raise Exception('Stealth address is not of basic type (one scan key, one spend key, no prefix)')
-    
-    scan_pubkey = hex_data[2:68]
-    spend_pubkey = hex_data[70:136]
-    
-    return scan_pubkey, spend_pubkey
 
 # Sending stealth payments
 

@@ -62,17 +62,13 @@ def mk_stealth_tx_outputs(stealth_addr, value, ephem_privkey, nonce, network='bt
         btc_magic_byte = 42
         if stealth_addr != pubkeys_to_basic_stealth_address(scan_pubkey, spend_pubkey, btc_magic_byte):
             raise Exception('Invalid btc mainnet stealth address: ' + stealth_addr)
-        
         magic_byte_addr = 0
-        magic_byte_p2sh = 5 
         
     elif network == 'testnet':
         testnet_magic_byte = 43
         if stealth_addr != pubkeys_to_basic_stealth_address(scan_pubkey, spend_pubkey, testnet_magic_byte):
-            raise Exception('Invalid testnet stealth address: ' + stealth_addr)
-    
+            raise Exception('Invalid testnet stealth address: ' + stealth_addr)    
         magic_byte_addr = 111
-        magic_byte_p2sh = 192
         
     ephem_pubkey = main.privkey_to_pubkey(ephem_privkey)
     output0 = {'script' : mk_stealth_metadata_script(ephem_pubkey, nonce),
